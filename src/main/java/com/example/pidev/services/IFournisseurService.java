@@ -10,4 +10,5 @@ public interface IFournisseurService {
     public Fournisseur addFournisseur(Fournisseur f);
     public void removeFournisseur(Long idFournisseur);
     public Fournisseur modifyFournisseur(Fournisseur fournisseur);
+    public List<Fournisseur> retrieveFournisseurByType(String type);
 }

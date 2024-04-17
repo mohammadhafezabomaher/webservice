@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface IProduitRepository extends JpaRepository<Produit , Long> {
     List<Produit> findByLibelleContainingIgnoreCase(String libelle);
+    List<Produit> findByStockLessThan(int threshold);
 }

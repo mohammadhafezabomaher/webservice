@@ -15,5 +15,6 @@ public interface IProduitService {
     public Produit modifyProduit(Produit produit);
     List<Produit> searchProduitsByLibelle(String libelle);
     Page<Produit> retrieveProduits(Pageable pageable);
+    public void performDailyCleanup();
 
 }

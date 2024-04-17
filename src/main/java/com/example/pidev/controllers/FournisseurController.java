@@ -36,5 +36,9 @@ public class FournisseurController {
     public void removeFournisseur(@PathVariable Long id) {
         fournisseurService.removeFournisseur(id);
     }
+    @GetMapping("/retrieveByType/{type}")
+    public List<Fournisseur> retrieveFournisseurByType(@PathVariable String type) {
+        return fournisseurService.retrieveFournisseurByType(type);
+    }
 
 }

@@ -35,4 +35,9 @@ public class FournisseurServiceImpl implements IFournisseurService{
     public Fournisseur modifyFournisseur(Fournisseur fournisseur) {
         return IFournisseurRepository.save(fournisseur);
     }
+
+    @Override
+    public List<Fournisseur> retrieveFournisseurByType(String type) {
+        return IFournisseurRepository.findByTypeFournisseur(type);
+    }
 }
