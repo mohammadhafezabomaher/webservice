@@ -1,0 +1,9 @@
+tn\esprit\DirectionFinanciereApplication.class
+tn\esprit\Entity\Message.class
+tn\esprit\Control\MeassageController.class
+tn\esprit\Entity\TypeRole.class
+tn\esprit\Service\IMessadeService.class
+tn\esprit\Repo\IContactRepository.class
+tn\esprit\Entity\Contact.class
+tn\esprit\Repo\IMessagerepo.class
+tn\esprit\Service\Messageimpl.class

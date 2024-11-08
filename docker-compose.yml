@@ -1,0 +1,62 @@
+services:
+  # Eureka Discovery Server
+  Discovery:
+    container_name: Discovery
+    build: ./Discovery
+    image: web-discovery # <-- Changed to lowercase
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=Discovery
+      - SERVER_PORT=8761
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+
+  # Doctor Microservice
+  DirectionFinanciere:
+    container_name: DirectionFinanciere
+    build: ./DirectionFinanciere
+    image: web-directionfinanciere # <-- Changed to lowercase
+    ports:
+      - "9095:9095"
+    environment:
+      - SPRING_APPLICATION_NAME=DirectionFinanciere
+      - SERVER_PORT=9095
+      - eureka.client.serviceUrl.defaultZone=http://Discovery:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-mysql:3306/microservice?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    depends_on:
+      - Discovery
+      - db-mysql
+
+  # API Gateway
+  api-gateway:
+    container_name: Gateway
+    build: ./gateway
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_APPLICATION_NAME=Gateway
+      - SERVER_PORT=8090
+      - eureka.client.serviceUrl.defaultZone=http://Discovery:8761/eureka/
+    depends_on:
+      - Discovery
+      - DirectionFinanciere
+
+  # Base de données MySQL pour Doctor Microservice
+  db-mysql:
+    container_name: db-mysql
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_DATABASE=microservice
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
