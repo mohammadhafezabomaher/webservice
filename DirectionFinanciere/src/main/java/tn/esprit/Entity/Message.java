@@ -30,8 +30,5 @@ public class Message {
 
     private Date dateSent;
 
-    // Additional field for status or type (optional)
-    private String status; // For example, "sent", "read", "delivered"
 
-    // If needed, you can add more fields like 'messageType', 'attachments', etc.
 }
