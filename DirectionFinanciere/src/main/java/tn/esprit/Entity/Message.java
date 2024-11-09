@@ -20,10 +20,10 @@ public class Message {
     private Long id;
 
     // Sender ID (userId in the Node.js service)
-    private Long senderId;
+    private String senderId;
 
     // Receiver ID (userId in the Node.js service)
-    private Long receiverId;
+    private String receiverId;
 
     @Column(length = 1000)
     private String message;

@@ -4,15 +4,18 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
 import tn.esprit.Repo.IMessagerepo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class Messageimpl implements IMessadeService {
 
+    private final ContactService contactService;
     private final IMessagerepo messageRepo;
     private final RestTemplate restTemplate;
 
@@ -39,23 +42,37 @@ public class Messageimpl implements IMessadeService {
     }
 
     @Override
-    public List<Message> getMessagesBySender(Long senderId) {
+    public List<Message> getMessagesBySender(String senderId) {
         return messageRepo.findBySenderId(senderId);
     }
 
     @Override
-    public List<Message> getMessagesByReceiver(Long receiverId) {
+    public List<Message> getMessagesByReceiver(String receiverId) {
         return messageRepo.findByReceiverId(receiverId);
     }
 
     @Override
-    public List<Long> findContactsByContactId(Long contactId) {
-        // Make a GET request to the Node.js microservice to fetch contacts
-        return restTemplate.getForObject(NODE_API_URL + "contacts/" + contactId, List.class);
+    public List<Contact> findContactsByContactId(String contactId) {
+       List<Message> listM=messageRepo.findBySenderId(contactId);
+
+        List<Contact> res = new ArrayList<>();
+
+        listM.forEach(message -> {
+            String receiverId = message.getReceiverId(); // Assuming there's a getReceiverId() method
+            Contact contact = contactService.getContactById(receiverId); // Fetch the contact by ID
+            if (contact != null) { // Ensure the contact exists
+                res.add(contact);
+            }
+        });
+
+        return res; // Return the populated list of contacts
     }
 
-    @Override
-    public List<Message> getChatBetweenContacts(Long contactId1, Long contactId2) {
-        return messageRepo.findChatBetweenContacts(contactId1, contactId2);
-    }
+
+
+
+   // @Override
+    //public List<Message> getChatBetweenContacts(String contactId1, String contactId2) {
+     //   return messageRepo.findChatBetweenContacts(contactId1, contactId2);
+    //}
 }

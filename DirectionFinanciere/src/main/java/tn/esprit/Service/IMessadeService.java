@@ -1,5 +1,6 @@
 package tn.esprit.Service;
 
+import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
 
 import java.util.List;
@@ -8,11 +9,11 @@ public interface IMessadeService {
 
     Message addMessage(Message message);
 
-    List<Message> getMessagesBySender(Long senderId);
+    List<Message> getMessagesBySender(String senderId);
 
-    List<Message> getMessagesByReceiver(Long receiverId);
+    List<Message> getMessagesByReceiver(String receiverId);
 
-    List<Long> findContactsByContactId(Long contactId);
+    List<Contact> findContactsByContactId(String contactId);
 
-    List<Message> getChatBetweenContacts(Long contactId1, Long contactId2);
+   // List<Message> getChatBetweenContacts(String contactId1, String contactId2);
 }

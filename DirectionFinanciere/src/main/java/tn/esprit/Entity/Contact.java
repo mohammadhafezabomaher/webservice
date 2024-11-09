@@ -1,10 +1,20 @@
 package tn.esprit.Entity;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Contact {
 
-    private Long idContact;
+    private String idContact;
     private String nom;
     private String prenom;
     private Long cin;
