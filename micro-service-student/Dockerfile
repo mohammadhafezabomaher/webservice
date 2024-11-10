@@ -1,28 +1,14 @@
-# Stage 1: Build
-FROM eclipse-temurin:17-jdk-jammy as builder
-WORKDIR /opt/app
+# Use an official OpenJDK base image
+FROM openjdk:17-jdk-slim as builder
 
-# Copy Maven wrapper files and configuration first
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
+# Set the working directory in the container
+WORKDIR /app
 
-# Ensure the mvnw script is executable
-RUN chmod +x mvnw
+# Copy the Maven build artifacts (JAR file) from your local machine into the container
+COPY target/molkajlassi4sae4-0.0.1-SNAPSHOT.jar app.jar
 
-# Download dependencies
-RUN ./mvnw dependency:go-offline -B
-
-# Copy application source code
-COPY src ./src
-RUN ./mvnw clean package -DskipTests
-
-# Stage 2: Runtime
-FROM eclipse-temurin:17-jre-jammy
-WORKDIR /opt/app
+# Expose the port the app will run on
 EXPOSE 9000
 
-# Copy the JAR file from the build stage
-COPY --from=builder /opt/app/target/*.jar /opt/app/app.jar
-
-# Set the entrypoint
-ENTRYPOINT ["java", "-jar", "/opt/app/app.jar"]
+# Define the entry point for the container to run the JAR file
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

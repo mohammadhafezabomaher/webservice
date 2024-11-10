@@ -18,10 +18,10 @@ public class EtudiantService {
     private EtudiantRepository etudiantRepository;
     @Autowired
     private RestTemplate restTemplate;
-
-    private static final String BASEUR_ADD_CONTACT = "http://127.0.0.1:5000/api/auth/register";
-    private static final String BASEURI_GET_CONTACT = "http://127.0.0.1:5000/api/auth/contacts/";
-    private static final String BASEURI_DELETE_CONTACT = "http://127.0.0.1:5000/api/auth/contacts/";
+    // test
+    private static final String BASEUR_ADD_CONTACT = "http://192.168.182.134:5000/api/auth/register";
+    private static final String BASEURI_GET_CONTACT = "http://192.168.182.134:5000/api/auth/contacts/";
+    private static final String BASEURI_DELETE_CONTACT = "http://192.168.182.134:5000/api/auth/contacts/";
     public EtudiantDto getEtudiantById(Long id) {
         Etudiant etudiant = etudiantRepository.findById(id).orElse(null);
         return getEtudiantDto(etudiant);
