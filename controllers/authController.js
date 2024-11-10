@@ -6,7 +6,8 @@ const Contact = require("../models/Contact");
 exports.register = async (req, res) => {
   try {
     // Extract data from request body
-    const { nom, prenom, cin, email, password } = req.body;
+    const { nom, prenom, cin, email, password, image,
+      dateNaissance, telephone, adresse, role } = req.body;
 
     // Validate if all required fields are provided
     if (!nom || !prenom || !cin || !email || !password) {
@@ -29,12 +30,17 @@ exports.register = async (req, res) => {
       cin,
       email,
       password: hashedPassword,
+      image,
+      dateNaissance,
+      telephone,
+      adresse,
+      role
     });
 
     // Save the new user to the database
-    await newContact.save();
+    contact = await newContact.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({ message: "User registered successfully", idContact: contact._doc._id, ...contact._doc });
   } catch (error) {
     console.error(error); // Log error for debugging
     res.status(500).json({ message: "Server error" });

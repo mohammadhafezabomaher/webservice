@@ -10,7 +10,7 @@ exports.getContactById = async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    res.json(contact); // Respond with the contact if found
+    res.json({ ...contact._doc, idContact : contact._id}); // Respond with the contact if found
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
