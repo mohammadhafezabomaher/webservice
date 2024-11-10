@@ -10,5 +10,7 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 //get contact by ID route
 router.get("/contacts/:id", contactController.getContactById);
+router.delete("/contacts/:id", contactController.deleteContactById);
+
 
 module.exports = router;
