@@ -2,16 +2,17 @@ package tn.esprit.Service;
 
 import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
+import tn.esprit.Entity.MessageDTO;
 
 import java.util.List;
 
 public interface IMessadeService {
 
-    Message addMessage(Message message);
+    MessageDTO addMessage(MessageDTO message);
 
-    List<Message> getMessagesBySender(String senderId);
+    List<MessageDTO> getMessagesBySender(String senderId);
 
-    List<Message> getMessagesByReceiver(String receiverId);
+    List<MessageDTO> getMessagesByReceiver(String receiverId);
 
     List<Contact> findContactsByContactId(String contactId);
 

@@ -2,6 +2,7 @@ package tn.esprit.Control;
 
 import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
+import tn.esprit.Entity.MessageDTO;
 import tn.esprit.Service.IMessadeService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +17,17 @@ public class MeassageController {
     private final IMessadeService service;
 
     @PostMapping("/Send")
-    public Message sendMessage(@RequestBody Message message) {
+    public MessageDTO sendMessage(@RequestBody MessageDTO message) {
         return service.addMessage(message);
     }
 
     @GetMapping("/getbysender/{senderId}")
-    public List<Message> getMessagesBySender(@PathVariable String senderId) {
+    public List<MessageDTO> getMessagesBySender(@PathVariable String senderId) {
         return service.getMessagesBySender(senderId);
     }
 
     @GetMapping("/getbyreceiver/{receiverId}")
-    public List<Message> getMessagesByReceiver(@PathVariable String receiverId) {
+    public List<MessageDTO> getMessagesByReceiver(@PathVariable String receiverId) {
         return service.getMessagesByReceiver(receiverId);
     }
 

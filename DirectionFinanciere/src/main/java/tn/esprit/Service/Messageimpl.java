@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
+import tn.esprit.Entity.MessageDTO;
 import tn.esprit.Repo.IMessagerepo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -23,32 +25,65 @@ public class Messageimpl implements IMessadeService {
     private final String NODE_API_URL = "http://localhost:3000/api/contact/";
 
     @Override
-    public Message addMessage(Message message) {
+    public MessageDTO addMessage(MessageDTO message) {
         // Use RestTemplate to verify if the sender and receiver exist in Node.js microservice
-        String senderUrl = NODE_API_URL + message.getSenderId();
-        String receiverUrl = NODE_API_URL + message.getReceiverId();
+        Message m = new Message();
+       m.setMessage(message.getMessage());
+       m.setDateSent(message.getDateSent());
+       m.setSenderId(message.getSenderContact().get_id());
+       m.setReceiverId(message.getReceiverContact().get_id());
 
-        // Make HTTP GET requests to check if contacts exist
-        try {
-            restTemplate.getForObject(senderUrl, String.class); // Validate sender exists
-            restTemplate.getForObject(receiverUrl, String.class); // Validate receiver exists
-        } catch (Exception e) {
-            // Handle the case when sender or receiver does not exist
-            throw new RuntimeException("Sender or receiver not found in Node.js service");
-        }
 
-        // If both contacts exist, save the message
-        return messageRepo.save(message);
+
+       Message res= messageRepo.save(m);
+
+        return  message;
     }
 
     @Override
-    public List<Message> getMessagesBySender(String senderId) {
-        return messageRepo.findBySenderId(senderId);
+    public List<MessageDTO> getMessagesBySender(String senderId) {
+        List<MessageDTO> res=new ArrayList<>();
+        List<Message> preb= messageRepo.findBySenderId(senderId);
+        preb.forEach(message -> {
+            Contact rec = contactService.getContactById(message.getReceiverId());
+            Contact sen = contactService.getContactById(message.getSenderId());
+            MessageDTO  prepare  = new MessageDTO();
+            prepare.setId(message.getId());
+            prepare.setMessage(message.getMessage());
+            prepare.setDateSent(message.getDateSent());
+            prepare.setReceiverContact(rec);
+            prepare.setSenderContact(sen);
+
+
+            res.add(prepare);
+
+        });
+        res.sort(Comparator.comparing(MessageDTO::getDateSent).reversed());
+
+        return res;
     }
 
     @Override
-    public List<Message> getMessagesByReceiver(String receiverId) {
-        return messageRepo.findByReceiverId(receiverId);
+    public List<MessageDTO> getMessagesByReceiver(String receiverId) {
+        List<MessageDTO> res=new ArrayList<>();
+        List<Message> preb= messageRepo.findByReceiverId(receiverId);
+        preb.forEach(message -> {
+            Contact rec = contactService.getContactById(message.getReceiverId());
+            Contact sen = contactService.getContactById(message.getSenderId());
+            MessageDTO  prepare  = new MessageDTO();
+            prepare.setId(message.getId());
+            prepare.setMessage(message.getMessage());
+            prepare.setDateSent(message.getDateSent());
+            prepare.setReceiverContact(rec);
+            prepare.setSenderContact(sen);
+
+
+            res.add(prepare);
+
+        });
+        res.sort(Comparator.comparing(MessageDTO::getDateSent).reversed());
+
+        return res;
     }
 
     @Override
