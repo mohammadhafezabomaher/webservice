@@ -14,7 +14,7 @@ import java.util.Date;
 @ToString
 public class ContactDto {
 
-    private Long idContact;
+    private String idContact;
     private String nom;
     private String prenom;
     private Long cin;

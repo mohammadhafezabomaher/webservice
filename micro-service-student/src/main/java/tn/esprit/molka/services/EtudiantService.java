@@ -19,7 +19,9 @@ public class EtudiantService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String BASEURI = "http://localhost:9000/";
+    private static final String BASEUR_ADD_CONTACT = "http://127.0.0.1:5000/api/auth/register";
+    private static final String BASEURI_GET_CONTACT = "http://127.0.0.1:5000/api/auth/contacts/";
+    private static final String BASEURI_DELETE_CONTACT = "http://127.0.0.1:5000/api/auth/contacts/";
     public EtudiantDto getEtudiantById(Long id) {
         Etudiant etudiant = etudiantRepository.findById(id).orElse(null);
         return getEtudiantDto(etudiant);
@@ -27,7 +29,7 @@ public class EtudiantService {
 
     private EtudiantDto getEtudiantDto (Etudiant etudiant) {
         EtudiantDto etudiantDto = new EtudiantDto();
-        ContactDto contactDto = getContactFromContactMicroService(etudiant.getIdEtudiant());
+        ContactDto contactDto = getContactFromContactMicroService(etudiant.getContactId());
         etudiantDto.setContact(contactDto);
         etudiantDto.setIdEtudiant(etudiant.getIdEtudiant());
         etudiantDto.setFaculte(etudiant.getFaculte());
@@ -58,7 +60,7 @@ public class EtudiantService {
     public Etudiant createEtudiant(EtudiantDto etudiantDto) {
         Etudiant etudiant = getEtudiant(etudiantDto);
         ContactDto contactDto = addContactFromContactMicroService(etudiantDto.getContact());
-        etudiant.setContactId(contactDto.getIdContact().toString());
+        etudiant.setContactId(contactDto.getIdContact());
         return etudiantRepository.save(etudiant);
     }
 
@@ -79,27 +81,28 @@ public class EtudiantService {
     }
 
     public void deleteEtudiant(Long id) {
+        Etudiant etudiant = etudiantRepository.findById(id).orElse(null);
         etudiantRepository.deleteById(id);
-        deleteContactFromContactMicroService(id);
+        deleteContactFromContactMicroService(etudiant.getContactId());
     }
 
     public List<Etudiant> getEtudiantsByIdentifiant(String identifiant) {
         return etudiantRepository.findByIdentifiant(identifiant);
     }
 
-    public ContactDto getContactFromContactMicroService(Long id) {
-        String url = BASEURI + "examen/contacts/find/"+ id.toString();
+    public ContactDto getContactFromContactMicroService(String id) {
+        String url = BASEURI_GET_CONTACT + id;
         ResponseEntity<ContactDto> response = restTemplate.getForEntity(url, ContactDto.class);
         return response.getBody();
     }
 
-    void deleteContactFromContactMicroService(Long id) {
-        String url = BASEURI + "examen/contacts/delete/"+ id.toString();
+    void deleteContactFromContactMicroService(String id) {
+        String url =  BASEURI_DELETE_CONTACT +  id ;
         restTemplate.delete(url);
     }
 
     public ContactDto addContactFromContactMicroService(ContactDto contactDto) {
-        String url = BASEURI + "examen/contacts/add";
+        String url = BASEUR_ADD_CONTACT;
         ResponseEntity<ContactDto> response = restTemplate.postForEntity(url,contactDto, ContactDto.class);
         return response.getBody();
     }
