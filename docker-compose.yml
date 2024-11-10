@@ -1,9 +1,8 @@
 services:
   # Eureka Discovery Server
-  Discovery:
-    container_name: Discovery
+  discovery:
+    container_name: discovery
     build: ./Discovery
-    image: web-discovery # <-- Changed to lowercase
     ports:
       - "8761:8761"
     environment:
@@ -11,40 +10,61 @@ services:
       - SERVER_PORT=8761
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
       - EUREKA_CLIENT_FETCH_REGISTRY=false
+    networks:
+      - my-network
 
   # Doctor Microservice
-  DirectionFinanciere:
-    container_name: DirectionFinanciere
+  directionfinanciere:
+    container_name: directionfinanciere
     build: ./DirectionFinanciere
-    image: web-directionfinanciere # <-- Changed to lowercase
     ports:
       - "9095:9095"
     environment:
-      - SPRING_APPLICATION_NAME=DirectionFinanciere
-      - SERVER_PORT=9095
-      - eureka.client.serviceUrl.defaultZone=http://Discovery:8761/eureka/
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db-mysql:3306/microservice?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=
+      SPRING_APPLICATION_NAME: directionfinanciere
+      eureka.client.serviceUrl.defaultZone: http://discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/microservice?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
     depends_on:
-      - Discovery
+      - discovery
       - db-mysql
+      - micro-service-contact
+    networks:
+      - my-network
+
 
   # API Gateway
   api-gateway:
     container_name: Gateway
-    build: ./gateway
+    build: ./api-gateway
     ports:
       - "8090:8090"
     environment:
       - SPRING_APPLICATION_NAME=Gateway
       - SERVER_PORT=8090
-      - eureka.client.serviceUrl.defaultZone=http://Discovery:8761/eureka/
+      - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_ID=microServiceConatct
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://192.168.1.89:5000
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0=Path=/api/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_ID=microServiceStudent
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://192.168.1.89:9000
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0=Path=/examen/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_ID=microServiceChat
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_URI=http://192.168.1.89:9095
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0=Path=/Message/**
+      - management.endpoints.web.exposure.include=*
+      - spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://192.168.1.89:8080/realms/JobBoardKeucloak/protocol/openid-connect/certs
     depends_on:
-      - Discovery
-      - DirectionFinanciere
+      - discovery
+      - directionfinanciere
+      - app
+      - micro-service-contact
+    networks:
+      - my-network
 
-#ketlock
+
+  #ketlock
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     environment:
@@ -82,6 +102,61 @@ services:
     restart: unless-stopped
     volumes:
       - db-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - my-network
+  app:
+    build:
+      context: ./micro-service-student
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/mardi?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      SPRING_JPA_SHOW_SQL: "false"
+      FILE_UPLOAD_DIR: ./uploads
+    depends_on:
+      - db-mysql
+      - micro-service-contact
+    networks:
+      - my-network
+
+  micro-service-contact:
+    build:
+      context: ./micro-service-contact
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_URI=mongodb://db-mongo:27017/contactdb
+      - JWT_SECRET=mysecretkey
+      - NODE_ENV=development
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://discovery:8761/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+    depends_on:
+      - db-mongo
+      - discovery
+    networks:
+      - my-network
+
+
+  db-mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=contactdb
+    networks:
+      - my-network
+
 
 volumes:
   db-data:
+networks:
+  my-network:
+    driver: bridge

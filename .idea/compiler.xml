@@ -10,7 +10,9 @@
         <module name="Candidat" />
         <module name="Discovery" />
         <module name="DirectionFinanciere" />
+        <module name="api-gateway" />
         <module name="Job" />
+        <module name="molkajlassi4sae4" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -24,6 +26,8 @@
       <module name="Discovery" options="-parameters" />
       <module name="Gateway" options="-parameters" />
       <module name="Job" options="-parameters" />
+      <module name="api-gateway" options="-parameters" />
+      <module name="molkajlassi4sae4" options="-parameters" />
     </option>
   </component>
 </project>
