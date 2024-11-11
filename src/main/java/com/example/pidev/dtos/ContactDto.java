@@ -1,20 +1,16 @@
-package com.example.pidev.entities;
+package com.example.pidev.dtos;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.pidev.entities.TypeRole;
+import lombok.*;
 
 import java.util.Date;
-@Entity
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Contact {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@ToString
+public class ContactDto {
     private Long idContact;
     private String nom;
     private String prenom;
@@ -26,6 +22,4 @@ public class Contact {
     private Long telephone;
     private String adresse;
     private TypeRole role;
-    @OneToOne
-    private Fournisseur fournisseur ;
 }

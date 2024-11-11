@@ -1,5 +1,8 @@
-package com.example.pidev.entities;
+package com.example.pidev.dtos;
 
+
+import com.example.pidev.entities.Produit;
+import com.example.pidev.entities.TypeFournisseur;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,19 +11,16 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Fournisseur {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FournisseurDto {
+
     private Long idFournisseur;
     @Enumerated(EnumType.STRING)
     private TypeFournisseur typeFournisseur;
-    private String contactId;
-    @OneToMany (mappedBy = "fournisseur")
+    private ContactDto contact;
     private List<Produit> produits;
 
 }
