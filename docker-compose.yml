@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7020:7020"
+    environment:
+      #  eureka.client.serviceUrl.defaultZone: http://discovery:8761/eureka/
+
+
+
+
+      # Using port 3307 both internally and externally
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3307/waladatabase?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+
+      # Use host.docker.internal to access localhost
+      # NODE_API_URL: http://host.docker.internal:5000  # Replace 3000 with your Node.js port
+        #  extra_hosts:
+      #  - "host.docker.internal:host-gateway"  # This is crucial for Linux
+        #  depends_on:
+      #      - db
+        #   networks:
+      #      - my-network
+
+
+      SPRING_JPA_SHOW_SQL: "false"
+      FILE_UPLOAD_DIR: ./uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: always
+    command: --port=3307  # Tell MySQL to use port 3307
+    environment:
+      MYSQL_DATABASE: waladatabase
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin
+      TZ: Africa/Tunis
+    ports:
+      - "3307:3307"  # Map to port 3307 on both sides
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "3307"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
