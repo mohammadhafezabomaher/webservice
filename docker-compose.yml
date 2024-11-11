@@ -1,0 +1,41 @@
+services:
+  admin:
+    container_name: admin
+    build: ./admin
+    ports:
+      - "9010:9010"
+    environment:
+      SPRING_APPLICATION_NAME: admin
+      eureka.client.serviceUrl.defaultZone: http://discovery:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/microservices?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      # Use host.docker.internal to access localhost
+      NODE_API_URL: http://host.docker.internal:5000  # Replace 3000 with your Node.js port
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # This is crucial for Linux
+    depends_on:
+      - db
+    networks:
+      - my-network
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: microservices
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ALLOW_EMPTY_PASSWORD: "false"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - my-network
+
+volumes:
+  db_data:
+
+networks:
+  my-network:
