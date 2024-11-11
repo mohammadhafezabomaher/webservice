@@ -14,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class Contact {
 
-    private String _id;
+    private String idContact;
     private String nom;
     private String prenom;
     private Long cin;

@@ -3,6 +3,7 @@ package tn.esprit.Control;
 import tn.esprit.Entity.Contact;
 import tn.esprit.Entity.Message;
 import tn.esprit.Entity.MessageDTO;
+import tn.esprit.Repo.IMessagerepo;
 import tn.esprit.Service.IMessadeService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 public class MeassageController {
 
     private final IMessadeService service;
+    private final IMessagerepo repo;
 
     @PostMapping("/Send")
     public MessageDTO sendMessage(@RequestBody MessageDTO message) {
@@ -25,7 +27,10 @@ public class MeassageController {
     public List<MessageDTO> getMessagesBySender(@PathVariable String senderId) {
         return service.getMessagesBySender(senderId);
     }
-
+    @GetMapping("/getall/")
+    public List<Message> getMessagesBySender() {
+        return repo.findAll();
+    }
     @GetMapping("/getbyreceiver/{receiverId}")
     public List<MessageDTO> getMessagesByReceiver(@PathVariable String receiverId) {
         return service.getMessagesByReceiver(receiverId);

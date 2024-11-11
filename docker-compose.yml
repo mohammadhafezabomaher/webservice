@@ -1,7 +1,7 @@
 services:
   # Eureka Discovery Server
   discovery:
-    container_name: discovery
+    container_name: ms-discovery-server
     build: ./Discovery
     ports:
       - "8761:8761"
@@ -13,16 +13,16 @@ services:
     networks:
       - my-network
 
-  # Doctor Microservice
+  # Direction Financiere Microservice
   directionfinanciere:
-    container_name: directionfinanciere
+    container_name: ms-finance-service
     build: ./DirectionFinanciere
     ports:
       - "9095:9095"
     environment:
       SPRING_APPLICATION_NAME: directionfinanciere
-      eureka.client.serviceUrl.defaultZone: http://discovery:8761/eureka/
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/microservice?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      eureka.client.serviceUrl.defaultZone: http://ms-discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-database:3306/microservice?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD:
       SPRING_JPA_HIBERNATE_DDL_AUTO: create
@@ -33,17 +33,37 @@ services:
     networks:
       - my-network
 
+  # Admin Service
+  admin:
+    container_name: ms-admin-service
+    build: ./admin
+    ports:
+      - "9010:9010"
+    environment:
+      SPRING_APPLICATION_NAME: admin
+      eureka.client.serviceUrl.defaultZone: http://ms-discovery-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-database:3306/microservices?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      NODE_API_URL: http://ms-contact-service:5000
+    depends_on:
+      - discovery
+      - db-mysql
+      - micro-service-contact
+    networks:
+      - my-network
 
   # API Gateway
   api-gateway:
-    container_name: Gateway
+    container_name: ms-api-gateway
     build: ./api-gateway
     ports:
       - "8090:8090"
     environment:
       - SPRING_APPLICATION_NAME=Gateway
       - SERVER_PORT=8090
-      - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+      - eureka.client.serviceUrl.defaultZone=http://ms-discovery-server:8761/eureka/
       - SPRING_CLOUD_GATEWAY_ROUTES_0_ID=microServiceConatct
       - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://192.168.1.89:5000
       - SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0=Path=/api/**
@@ -53,6 +73,9 @@ services:
       - SPRING_CLOUD_GATEWAY_ROUTES_2_ID=microServiceChat
       - SPRING_CLOUD_GATEWAY_ROUTES_2_URI=http://192.168.1.89:9095
       - SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0=Path=/Message/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_ID=admin
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_URI=http://192.168.1.89:9091
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0=Path=/admin/**
       - management.endpoints.web.exposure.include=*
       - spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://192.168.1.89:8080/realms/JobBoardKeucloak/protocol/openid-connect/certs
     depends_on:
@@ -60,28 +83,29 @@ services:
       - directionfinanciere
       - app
       - micro-service-contact
+      - admin
     networks:
       - my-network
 
-
-  #ketlock
   keycloak:
+    container_name: ms-keycloak
     image: quay.io/keycloak/keycloak:latest
     environment:
-      - KEYCLOAK_ADMIN=admin  # New admin user variable
-      - KEYCLOAK_ADMIN_PASSWORD=admin  # New admin password variable
-      - KC_DB=postgres  # Updated DB vendor option
-      - KC_DB_URL_HOST=db  # Updated database host
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=postgres-database
       - KC_DB_USERNAME=keycloak
       - KC_DB_PASSWORD=password
       - KC_DB_DATABASE=keycloak
-    command: [ "start-dev" ]  # Using start-dev mode for development
+    command: [ "start-dev" ]
     ports:
-        - "8080:8080"
+      - "8080:8080"
     depends_on:
-        - db
+      - db
 
   db:
+    container_name: postgres-database
     image: postgres:latest
     environment:
       POSTGRES_DB: keycloak
@@ -89,9 +113,9 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
-  # Base de données MySQL pour Doctor Microservice
+
   db-mysql:
-    container_name: db-mysql
+    container_name: mysql-database
     image: mysql:8
     environment:
       - MYSQL_ROOT_PASSWORD=
@@ -105,14 +129,16 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - my-network
+
   app:
+    container_name: ms-student-service
     build:
       context: ./micro-service-student
       dockerfile: Dockerfile
     ports:
       - "9000:9000"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-mysql:3306/mardi?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-database:3306/mardi?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD:
       SPRING_JPA_HIBERNATE_DDL_AUTO: create
@@ -125,6 +151,7 @@ services:
       - my-network
 
   micro-service-contact:
+    container_name: ms-contact-service
     build:
       context: ./micro-service-contact
       dockerfile: Dockerfile
@@ -132,10 +159,10 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - DB_URI=mongodb://db-mongo:27017/contactdb
+      - DB_URI=mongodb://mongodb-database:27017/contactdb
       - JWT_SECRET=mysecretkey
       - NODE_ENV=development
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://discovery:8761/eureka/
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://ms-discovery-server:8761/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
     depends_on:
@@ -144,8 +171,8 @@ services:
     networks:
       - my-network
 
-
   db-mongo:
+    container_name: mongodb-database
     image: mongo:latest
     ports:
       - "27017:27017"
@@ -154,9 +181,10 @@ services:
     networks:
       - my-network
 
-
 volumes:
   db-data:
+  db_data:
+
 networks:
   my-network:
     driver: bridge

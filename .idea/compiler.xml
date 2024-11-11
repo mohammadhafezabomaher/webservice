@@ -8,11 +8,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Candidat" />
-        <module name="Discovery" />
         <module name="DirectionFinanciere" />
-        <module name="api-gateway" />
-        <module name="Job" />
         <module name="molkajlassi4sae4" />
+        <module name="Discovery" />
+        <module name="api-gateway" />
+        <module name="admin" />
+        <module name="Job" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -26,6 +27,7 @@
       <module name="Discovery" options="-parameters" />
       <module name="Gateway" options="-parameters" />
       <module name="Job" options="-parameters" />
+      <module name="admin" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
       <module name="molkajlassi4sae4" options="-parameters" />
     </option>

@@ -21,8 +21,6 @@ public class Messageimpl implements IMessadeService {
     private final IMessagerepo messageRepo;
     private final RestTemplate restTemplate;
 
-    // URL of the Node.js microservice (adjust as per your setup)
-    private final String NODE_API_URL = "http://localhost:3000/api/contact/";
 
     @Override
     public MessageDTO addMessage(MessageDTO message) {
@@ -30,8 +28,8 @@ public class Messageimpl implements IMessadeService {
         Message m = new Message();
        m.setMessage(message.getMessage());
        m.setDateSent(message.getDateSent());
-       m.setSenderId(message.getSenderContact().get_id());
-       m.setReceiverId(message.getReceiverContact().get_id());
+       m.setSenderId(message.getSenderContact().getIdContact());
+       m.setReceiverId(message.getReceiverContact().getIdContact());
 
 
 

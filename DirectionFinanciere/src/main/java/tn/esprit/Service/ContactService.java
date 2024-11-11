@@ -16,7 +16,7 @@ public class ContactService {
     }
 
     public Contact getContactById(String id) {
-        String url = "http://localhost:5000/api/auth/contacts/" + id;  // Replace with your actual URL
+        String url = "http://192.168.1.89:5000/api/auth/contacts/" + id;  // Replace with your actual URL
 
         // Perform a GET request
         ResponseEntity<Contact> response = restTemplate.getForEntity(url, Contact.class);
